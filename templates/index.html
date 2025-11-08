@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Jira Bug Creator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    function loadImage(file, targetInputId, previewId, containerId) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById(targetInputId).value = e.target.result;
+        const preview = document.getElementById(previewId);
+        preview.src = e.target.result;
+        preview.style.display = "block"; // ✅ show the image again
+        document.getElementById(containerId).classList.remove("hidden");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handlePaste(e, targetInputId, previewId, containerId) {
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      for (const item of items) {
+        if (item.type.indexOf("image") === 0) {
+          const blob = item.getAsFile();
+          loadImage(blob, targetInputId, previewId, containerId);
+        }
+      }
+    }
+
+    function handleFileInput(e, targetInputId, previewId, containerId) {
+      const file = e.target.files[0];
+      if (file) {
+        loadImage(file, targetInputId, previewId, containerId);
+      }
+    }
+
+    function removeImage(targetInputId, previewId, containerId, fileInputId) {
+      document.getElementById(targetInputId).value = "";
+      document.getElementById(previewId).src = "";
+      document.getElementById(containerId).classList.add("hidden");
+      if (fileInputId) {
+        document.getElementById(fileInputId).value = "";
+      }
+    }
+  </script>
+</head>
+<body class="bg-[#1E1E1E] min-h-screen flex flex-col items-center py-10 text-gray-200">
+
+  <div class="w-full max-w-3xl bg-[#2C2C2C] shadow-xl rounded-lg p-8 border border-[#3C3C3C]">
+    <h1 class="text-2xl font-bold text-white-400 mb-6 flex items-center gap-2">
+      🐞 Jira Bug Creator
+    </h1>
+
+    <form action="/submit" method="post" class="space-y-6" id="bugForm">
+
+      <!-- Title -->
+      <div>
+        <label class="block text-sm font-medium text-gray-300">Bug Title</label>
+        <input type="text" name="title" required value="{{ title or '' }}"
+               class="mt-1 block w-full border border-[#3C3C3C] bg-[#1E1E1E] rounded-lg shadow-sm p-2 focus:ring-purple-500 focus:border-purple-500"/>
+      </div>
+
+      <!-- Description -->
+        <div>
+          <label class="block text-sm font-medium text-gray-300">Description</label>
+          <textarea name="description" rows="5" required
+                    class="mt-1 block w-full border border-[#3C3C3C] bg-[#1E1E1E] rounded-lg shadow-sm p-2 focus:ring-purple-500 focus:border-purple-500">{{ description or '' }}</textarea>
+        </div>
+
+      <!-- Screenshots -->
+      <!-- Master screenshot -->
+      <div onpaste="handlePaste(event, 'screenshot_master', 'preview_master', 'container_master')"
+           class="border-2 border-dashed border-[#3C3C3C] rounded-lg p-4 text-center hover:border-purple-400 bg-[#1E1E1E]">
+        <p class="text-sm text-gray-300 mb-2"><strong>Master Screenshot</strong></p>
+
+        <label for="file_master"
+               class="cursor-pointer px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition">
+          Choose File
+        </label>
+        <input type="file" accept="image/*" id="file_master"
+               onchange="handleFileInput(event, 'screenshot_master', 'preview_master', 'container_master')"
+               class="hidden">
+        <p class="text-xs text-gray-500 mt-2">Paste (Ctrl+V) or choose a file</p>
+        <input type="hidden" name="screenshot_master" id="screenshot_master" value="{{ screenshot_master or '' }}">
+
+        <div id="container_master" class="relative inline-block mt-4 {% if not screenshot_master %}hidden{% endif %}">
+          <img
+            id="preview_master"
+            src="{{ screenshot_master or '' }}"
+            class="mx-auto max-h-40 rounded shadow border border-[#3C3C3C]"
+            alt="Master screenshot preview"
+            {% if not screenshot_master %}style="display:none;"{% endif %}
+          />
+          <button type="button"
+                  onclick="removeImage('screenshot_master','preview_master','container_master','file_master')"
+                  class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-2">✕</button>
+        </div>
+      </div>
+
+      <!-- Branch screenshot -->
+      <div onpaste="handlePaste(event, 'screenshot_branch', 'preview_branch', 'container_branch')"
+           class="border-2 border-dashed border-[#3C3C3C] rounded-lg p-4 text-center hover:border-purple-400 bg-[#1E1E1E] mt-6">
+        <p class="text-sm text-gray-300 mb-2"><strong>Branch Screenshot</strong></p>
+
+        <label for="file_branch"
+               class="cursor-pointer px-4 py-2 bg-purple-600 text-white rounded-lg shadow hover:bg-purple-700 transition">
+          Choose File
+        </label>
+        <input type="file" accept="image/*" id="file_branch"
+               onchange="handleFileInput(event, 'screenshot_branch', 'preview_branch', 'container_branch')"
+               class="hidden">
+        <p class="text-xs text-gray-500 mt-2">Paste (Ctrl+V) or choose a file</p>
+        <input type="hidden" name="screenshot_branch" id="screenshot_branch" value="{{ screenshot_branch or '' }}">
+
+        <div id="container_branch" class="relative inline-block mt-4 {% if not screenshot_branch %}hidden{% endif %}">
+          <img
+            id="preview_branch"
+            src="{{ screenshot_branch or '' }}"
+            class="mx-auto max-h-40 rounded shadow border border-[#3C3C3C]"
+            alt="Branch screenshot preview"
+            {% if not screenshot_branch %}style="display:none;"{% endif %}
+          />
+          <button type="button"
+                  onclick="removeImage('screenshot_branch','preview_branch','container_branch','file_branch')"
+                  class="absolute top-0 right-0 bg-red-600 text-white rounded-full px-2">✕</button>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="text-right">
+        <button type="submit"
+                class="px-4 py-2 bg-blue-700 text-white rounded-lg shadow hover:bg-white-800 transition">
+          Generate Bug
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Result Box -->
+  {% if bug %}
+  <div class="w-full max-w-3xl bg-[#252526] border border-[#3C3C3C] rounded-lg shadow-inner p-6 mt-8">
+    <h2 class="text-xl font-semibold text-blue-400 mb-4">Generated Bug Report</h2>
+    <div class="bg-[#1E1E1E] border border-[#3C3C3C] rounded p-4 overflow-x-auto text-sm text-gray-300 whitespace-pre-wrap">{{ bug | safe }}</div>
+
+  </div>
+  {% endif %}
+
+    <!-- Loading Overlay (Grayed Background) -->
+    <div id="loadingOverlay"
+         class="hidden fixed inset-0 bg-gray-900 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+      <div class="text-center">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-400 mx-auto"></div>
+        <p class="text-white mt-4 text-lg font-semibold">Thinking...</p>
+      </div>
+     </div>
+
+
+  <!-- JavaScript -->
+  <script>
+    const form = document.getElementById("bugForm");
+    const overlay = document.getElementById("loadingOverlay");
+
+    // Show loader when submitting
+    form.addEventListener("submit", () => {
+      overlay.classList.remove("hidden");
+    });
+
+    // Hide loader when the new page is loaded
+    window.addEventListener("pageshow", () => {
+      overlay.classList.add("hidden");
+    });
+  </script>
+
+
+</body>
+</html>

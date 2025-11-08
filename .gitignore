@@ -1,0 +1,65 @@
+# --- Python cache and build files ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.so
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+.venv*/
+env*/
+venv*/
+
+# --- Environment variables ---
+.env
+.env.*
+!.env.example  # (keep example file for instructions)
+
+# --- Logs and temporary files ---
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.DS_Store
+
+# --- IDE and editor configs ---
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# --- OS specific ---
+Thumbs.db
+Desktop.ini
+
+# --- Jupyter / notebooks (if any future analysis) ---
+.ipynb_checkpoints/
+
+# --- Flask / local runtime ---
+instance/
+*.db
+*.sqlite3
+*.sqlite
+__pypackages__/
+
+# --- Images / uploads (optional) ---
+uploads/
+screenshots/
+*.png
+*.jpg
+*.jpeg
+
+# --- Mac / Windows hidden files ---
+.DS_Store
+Icon?
+ehthumbs.db
