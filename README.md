@@ -94,8 +94,3 @@ Flask
 Google Gemini API
 
 Base64 / Pillow (for image handling)
-
-## 🛡️ License
-
-This project is licensed under the All Rights Reserved License —
-you cannot reproduce, modify, or distribute this software without explicit permission from the author.
