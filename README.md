@@ -53,7 +53,7 @@ GEMINI_API_KEY=your_api_key_here
 ```
 You can get your key from https://aistudio.google.com/app/apikey
 
-## 🧩 ▶️ Run the App
+## ▶️ Run the App
 ### 1. Run the Flask app:
 ```bash
 python app.py
