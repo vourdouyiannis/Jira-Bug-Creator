@@ -1,39 +1,56 @@
+import json
+import re
 from services.gemini_service import generate_content
-from services.utils import load_prompt
-from services.image_utils import compress_image  # ensure this exists
+from services.utils import load_prompt, format_prompt
+from services.image_utils import compress_image
+
+
+def extract_json_block(text: str) -> str:
+    """
+    Extract JSON between <json> ... </json>.
+    Returns the inner content or the raw text if not found.
+    """
+    match = re.search(r"<json>(.*?)</json>", text, re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return text.strip()
 
 
 def analyze_bug(title, description, master_img_b64=None, branch_img_b64=None):
     """
-    The Analyst agent now handles:
-    - Title + description analysis
-    - Screenshots (1 or 2) with automatic compression
-    - Combined + sequential fallback for stability
+    Analyst Agent:
+    - Compares screenshots visually
+    - Considers title + description for context
+    - Returns ONLY structured JSON (differences, root_cause, severity, notes)
     """
+
     if not (master_img_b64 or branch_img_b64):
-        return ""
+        return {
+            "differences": "",
+            "root_cause": "",
+            "severity": "",
+            "notes": ""
+        }
 
-    # Load and format prompt
-    prompt = load_prompt("analyst_agent").format(
-        title=title,
-        description=description
-    )
-    # Clarify runtime context (added dynamically, not in txt)
-    prompt += "\n\nNote: If two screenshots are provided, they represent PRODUCTION (master) and DEVELOPMENT (branch). Compare them visually."
+    # Load the strict JSON prompt
+    template = load_prompt("analyst_agent")
+    prompt = format_prompt(template, title=title, description=description)
 
-    # Prepare input
+    # Build request
     inputs = [
-        {"role": "user", "parts": [
-            {"text": prompt},
-        ]}
+        {
+            "role": "user",
+            "parts": [{"text": prompt}]
+        }
     ]
 
-    # Add screenshots if available
+    # Add images
     if master_img_b64:
         inputs[0]["parts"].append({
             "mime_type": "image/jpeg",
             "data": compress_image(master_img_b64)
         })
+
     if branch_img_b64:
         inputs[0]["parts"].append({
             "mime_type": "image/jpeg",
@@ -41,26 +58,40 @@ def analyze_bug(title, description, master_img_b64=None, branch_img_b64=None):
         })
 
     print("🔍 Analyst Agent → Sending to Gemini...")
-    result = generate_content(inputs)
+    raw = generate_content(inputs)
 
-    # Fallback: if response fails or stalls, try analyzing images separately
-    if not result and master_img_b64 and branch_img_b64:
-        print("⚠️ Combined analysis failed, retrying sequentially...")
-        results = []
-        for img_b64 in [master_img_b64, branch_img_b64]:
-            img_inputs = [
-                {
-                    "role": "user",
-                    "parts": [
-                        {"text": prompt},
-                        {"mime_type": "image/jpeg", "data": compress_image(img_b64)}
-                    ]
-                }
-            ]
-            partial = generate_content(img_inputs)
-            if partial:
-                results.append(partial)
-        result = "\n\n".join(results)
+    if not raw:
+        print("⚠️ Analyst returned empty response.")
+        return {
+            "differences": "",
+            "root_cause": "",
+            "severity": "",
+            "notes": ""
+        }
 
-    print("✅ Analyst Agent → Gemini response received.")
-    return result
+    # Extract JSON cleanly
+    cleaned = extract_json_block(raw)
+
+    # Validate JSON output
+    try:
+        parsed = json.loads(cleaned)
+
+        # Enforce schema
+        if not isinstance(parsed, dict):
+            raise ValueError("JSON is not an object")
+
+        # Ensure required fields exist
+        for key in ["differences", "root_cause", "severity", "notes"]:
+            if key not in parsed:
+                parsed[key] = ""
+
+        return parsed
+
+    except Exception as e:
+        print(f"⚠️ Invalid JSON from analyst: {e}")
+        return {
+            "differences": cleaned or "",
+            "root_cause": "",
+            "severity": "",
+            "notes": ""
+        }
