@@ -55,17 +55,17 @@ GEMINI_API_KEY=your_api_key_here
 You can get your key from https://aistudio.google.com/app/apikey
 
 ## ▶️ Run the App
-### 1. Run the Flask app:
+### 1️⃣ Run the Flask app:
 ```bash
 python app.py
 ```
 
-### 2. Open your browser and go to:
+### 2️⃣ Open your browser and go to:
 ```
 http://127.0.0.1:5000/
 ```
 
-### 3. Fill in:
+### 3️⃣ Fill in:
 
 ```
 A) Bug title
@@ -73,7 +73,7 @@ B) Bug description
 C) Optional for better results: Upload screenshots (Production / Development)
 ```
 
-### 4. Click **Generate Bug** Report 🪄
+### 4️⃣ Click **Generate Bug** Report 🪄
 ```
 ✅ You’ll get a detailed and professional bug report with:
 
