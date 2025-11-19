@@ -70,7 +70,7 @@ http://127.0.0.1:5000/
 ```
 A) Bug title
 B) Bug description
-C) Upload screenshots (Production / Development)
+C) Optional for better results: Upload screenshots (Production / Development)
 ```
 
 ### 4. Click **Generate Bug** Report 🪄
