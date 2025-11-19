@@ -30,6 +30,7 @@ Built with **Flask**, **Gemini API**, and modular AI agents.
 ### 1️⃣ Clone the repository
 
 ```bash
+cd C:\path\to\where\you\want\project
 git clone https://github.com/vourdouyiannis/Jira_Bug_Creator.git
 cd Jira_Bug_Creator
 ```
