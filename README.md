@@ -8,7 +8,8 @@ Built with **Flask**, **Gemini API**, and modular AI agents.
 
 ## 🚀 Features
 
-🔍 **Analyst Agent** — Compares screenshots (Production vs. Development) to detect UI or functional differences
+🔍 **Analyst Agent** — Compares screenshots (Production vs. Development) to detect UI or functional 
+differences
 
 🧾 **QA Agent** — Converts visual and textual findings into structured, human-readable bug reports
 
@@ -50,6 +51,7 @@ pip install -r requirements.txt
 Create a `.env` file in the project root with the following variables:
 ```env
 GEMINI_API_KEY=your_api_key_here
+MODEL_NAME=your_model_name_here
 ```
 You can get your key from https://aistudio.google.com/app/apikey
 
