@@ -3,16 +3,18 @@ from services.gemini_service import generate_content
 from services.utils import load_prompt, format_prompt
 
 
-
-def generate_bug_report(title, description, analyst_findings, master_img_b64=None, branch_img_b64=None):
+def generate_bug_report(title, description, analyst_findings):
     """
-    QA Agent:
-    - Consumes structured JSON from the Analyst Agent
-    - Produces a clean Markdown bug report
-    - Screenshots are NOT sent to Gemini anymore
+    Generate a structured Markdown bug report using Gemini based on analyst findings.
+
+    @param title: str, the bug title.
+    @param description: str, the bug description.
+    @param analyst_findings: dict or str, structured findings from Analyst Agent.
+
+    @return: str, cleaned Markdown bug report or fallback error message.
     """
 
-    # Ensure analyst_findings is always JSON-serializable
+    # Normalize input to JSON string
     if isinstance(analyst_findings, dict):
         analyst_json = json.dumps(analyst_findings, indent=2)
     else:
@@ -28,7 +30,8 @@ def generate_bug_report(title, description, analyst_findings, master_img_b64=Non
 
     # Build the prompt
     template = load_prompt("qa_agent")
-    prompt = format_prompt(template, title=title, description=description, analyst_findings=analyst_json)
+    prompt = format_prompt(template, title=title, description=description,
+                           analyst_findings=analyst_json)
 
     inputs = [
         {

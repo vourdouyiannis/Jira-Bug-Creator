@@ -1,21 +1,29 @@
 import time
+import os
 import google.generativeai as genai
 from google.api_core import exceptions as google_exceptions
-import os
+from dotenv import load_dotenv
 
 # Configure Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Choose the model — 2.5 Pro
-MODEL_NAME = "gemini-2.5-pro"
+load_dotenv()
+
+# Choose the model from environment
+MODEL_NAME = os.getenv("MODEL_NAME")
 MODEL = genai.GenerativeModel(MODEL_NAME)
+
 
 def generate_content(inputs, max_retries=2, timeout=30):
     """
-    Sends a multimodal request (text + optional images) to Gemini.
-    Handles timeouts, retries, and empty responses safely.
-    """
+    Send a multimodal request to Gemini with retry and timeout handling.
 
+    @param inputs: list, prompt in Gemini API format.
+    @param max_retries: int, number of retry attempts.
+    @param timeout: int, timeout in seconds per attempt.
+
+    @return: str, response text or fallback error message.
+    """
     attempt = 0
     while attempt < max_retries:
         attempt += 1

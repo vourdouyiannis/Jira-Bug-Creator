@@ -5,11 +5,18 @@ from PIL import Image
 
 def compress_image(b64_string, max_size_kb=300):
     """
-    Compresses a base64 image to reduce size before sending to Gemini.
-    Keeps quality decent for UI comparison.
-    Returns raw binary bytes.
+    Compress a base64-encoded image to reduce payload size.
+
+    Resizes image to max 600px dimension and adjusts JPEG quality
+    until size is under max_size_kb.
+
+    @param b64_string: str, base64 input image.
+    @param max_size_kb: int, max allowed size in KB.
+
+    @return: bytes, compressed binary image data.
     """
     try:
+        # Strip off data URI prefix if present
         if b64_string.startswith("data:image"):
             b64_string = b64_string.split(",")[1]
 
@@ -17,6 +24,8 @@ def compress_image(b64_string, max_size_kb=300):
         img = Image.open(BytesIO(image_data)).convert("RGB")
 
         max_dim = 600
+
+        # Resize for reasonable quality/runtime tradeoff
         img.thumbnail((max_dim, max_dim))
 
         buffer = BytesIO()
